@@ -1,0 +1,20 @@
+[
+    {
+        nombre: "Plasticola",
+        descripcion: "Platicola mapel",
+        codigo: 123,
+        foto: "www.ola.com",
+        precio: 123.2,
+        stock: 15,
+        id: 1
+    },
+    {
+        nombre: "Bon o Bon",
+        descripcion: "Bocadito de chocolate",
+        codigo: 321,
+        foto: "www.bonobon.com",
+        precio: 70,
+        stock: 30,
+        id: 2
+    }
+];
