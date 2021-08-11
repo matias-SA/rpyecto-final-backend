@@ -1,38 +1,80 @@
+const fs = require('fs');
 const producto = require('./producto');
 
 class Carrito {
-    // id, timestamp(carrito), producto: { id, timestamp(producto), nombre, descripcion, código, foto
-    // (url), precio, stock }
 
     constructor() { }
 
-    cartList = [];
     id = 0;
+    filePlace = './persistencia/carrito.txt'
 
-    get getCartList() {
-        return this.cartList.length == 0 ? { error: 'no hay productos cargados' } : this.cartList
+    leer = async () => {
+        try {
+            const data = await fs.promises.readFile(`${this.filePlace}`, 'utf-8');
+            return JSON.parse(data);
+        } catch {
+            return [];
+        }
+    }
+    async getCartList() {
+        const cartList = await this.leer()
+        return cartList.length == 0 ? { error: 'no hay productos agregados' } : cartList
     }
 
-    getProductCart(id) {
-        const productFound = this.cartList.find(product => product.id == id)
+    async getProductCart(id) {
+        const cartList = await this.leer();
+        const productFound = cartList.find(product => product.id == id)
         return productFound == undefined ? { error: 'producto no encontrado' } : productFound
     }
 
-    agregarCarrito(id) {
-        const cartProductData = {
-            id: this.id += 1,
-            timestamp: Date.now(),
-            prducto: producto.getProduct(id)
+    async addProductCart(idData) {
+        try {
+            const id = parseInt(idData)
+            const data = await fs.promises.readFile(`${this.filePlace}`, 'utf-8');
+            const info = JSON.parse(data);
+            const productFound = await producto.getProduct(id)
+            if (productFound.error == 'producto no encontrado') {
+                return { error: 'no se encontro el producto' }
+            } else {
+                const cartProductData = {
+                    id: this.id += 1,
+                    timestamp: Date.now(),
+                    prducto: productFound
+                }
+                info.push(cartProductData);
+                try {
+                    await fs.promises.writeFile(`${this.filePlace}`, JSON.stringify(info, null, '\t'))
+                    return cartProductData;
+                } catch (error) {
+                    console.error("error de guardado en el archivo", error);
+                }
+            }
+
+        } catch (error) {
+            console.log(error);
         }
-        this.cartList.push(cartProductData)
-        return this.cartList
     }
 
-    deleteProduct(idData) {
-        let id = parseInt(idData)
-        // let productRemoved = this.getProduct(id);
-        let indexProduct = this.cartList.findIndex(product => product.id === id);
-        return indexProduct == -1 ? { error: "No existe el producto que desea borrar" } : this.cartList.splice(indexProduct, 1)
+    async deleteProduct(idData) {
+        try {
+            const id = parseInt(idData)
+            const data = await fs.promises.readFile(`${this.filePlace}`, 'utf-8');
+            const info = JSON.parse(data);
+            const indexProduct = info.findIndex(productCart => productCart.id === id);
+            if (indexProduct == -1) {
+                return { error: "No existe el producto que desea borrar" }
+            } else {
+                const productRemoved = info.splice(indexProduct, 1)
+                try {
+                    await fs.promises.writeFile(`${this.filePlace}`, JSON.stringify(info, null, '\t'))
+                    return productRemoved[0];
+                } catch (error) {
+                    console.error("error de guardado en el archivo", error);
+                }
+            }
+        } catch (error) {
+            console.log('error al eliminar el archivo', error);
+        }
     }
 }
 module.exports = new Carrito;

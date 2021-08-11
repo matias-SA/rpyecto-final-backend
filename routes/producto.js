@@ -1,26 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const product = require('../api/producto');
+const isAdmin = require('../middleware/isAdmin')
 
-router.get('/listar', (req, res) => {
-    res.send(product.getProductList())
+router.get('/listar', async (req, res) => {
+    res.send(await product.getProductList())
 });
 
 router.get('/listar/:id', async (req, res) => {
     res.send(await product.getProduct(req.params.id))
 });
 
-router.post('/agregar', async (req, res) => {
-    let productSaved = await product.newProduct(req.body)
-    res.send(productSaved)
+router.post('/agregar', isAdmin, async (req, res) => {
+    res.send(await product.newProduct(req.body))
 })
 
-router.put('/actualizar/:id', (req, res) => {
-    res.send(product.putProduct(req.params.id, req.body))
+router.put('/actualizar/:id', isAdmin, async (req, res) => {
+    res.send(await product.putProduct(req.params.id, req.body))
 })
 
-router.delete('/borrar/:id', (req, res) => {
-    res.send(product.deleteProduct(req.params.id))
+router.delete('/borrar/:id', isAdmin, async (req, res) => {
+    res.send(await product.deleteProduct(req.params.id))
 })
 
 module.exports = router;
