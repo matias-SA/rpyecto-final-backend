@@ -1,4 +1,4 @@
-const admin = false;
+const admin = true;
 
 function isAdmin(req, res, next) {
     if (!admin) {
