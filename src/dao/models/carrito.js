@@ -3,7 +3,7 @@ const productosSchema = require('./producto');
 
 const carritoSchema = new Schema({
     timestamp: { type: Date, default: new Date() },
-    products: [Object]
+    products: { type: Array, "default": [productosSchema] }
 })
 
 module.exports = model('Carrito', carritoSchema);

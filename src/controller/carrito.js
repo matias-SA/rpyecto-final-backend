@@ -7,9 +7,9 @@ exports.createCart = async (req, res) => {
     const { params: id } = req;
     let cartData = await carritoService.getCartList();
     const product = await productoService.selectProductByID(id.id);
-    if (cartData[0]._id) {
+    if (cartData.length !== 0) {
         try {
-            const cart = await carritoService.updateCart('616b380fcc99ae63e5007bc9', product);
+            const cart = await carritoService.updateCart(cartData[0]._id, product);
             res.status(200).send({ success: true, msg: cart })
         } catch (error) {
             console.log(error);
@@ -35,11 +35,36 @@ exports.createCart = async (req, res) => {
 }
 
 exports.selectCart = async (req, res) => {
+    const { params: id } = req;
     try {
-        const cartData = await carritoService.getCartList();
+        let cartData = await carritoService.getCartList();
+        if (id.id) {
+            try {
+                cartData = cartData[0].products.filter(x => x._id == id.id);
+            } catch (error) {
+                console.log(error);
+            }
+        }
         res.status(200).send(cartData);
     }
     catch (error) {
         res.status(500).send({ success: false, msg: "Error del servidor." })
+    }
+}
+
+exports.deleteProductCart = async (req, res) => {
+    const { params: id } = req;
+    let cartData = await carritoService.getCartList();
+    const product = await productoService.selectProductByID(id.id);
+    try {
+        if (!id.id || cartData.length == 0 || !product) {
+            throw { code: 404 }
+        }
+        console.log(cartData[0]._id);
+        console.log(id.id);
+        let productUpdated = await carritoService.deleteProduct(cartData[0]._id, product);
+        res.status(200).send(productUpdated);
+    } catch (error) {
+        return res.status(404).send({ success: false, msg: "No se pudo encontrar el producto o no existe el carrito" })
     }
 }
